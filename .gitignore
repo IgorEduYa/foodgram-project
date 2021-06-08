@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 media/
+.idea
+load_data.py
+sent_emails/
