@@ -4,11 +4,15 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'pages/index.css' %}">
 {% endblock %}
-{% block header %}Рецепты{% endblock %}
-{% block ul_tags %} {% include "includes/tag_nav.html" with current_url="tag_index" %} {% endblock %}
+{% block header %}{{ author.username }}{% endblock %}
+{% block ul_tags %} {% include "includes/tag_nav.html" with current_url="tag_profile" username=author.username %} {% endblock %}
 
 {% block content %}
   {% load user_filters %}
+
+        <div class="author-subscribe" data-author="323">
+            <p style="padding: 0 0 2em 0;"><button class="button button_style_light-blue button_size_subscribe" name="subscribe" data-out>Подписаться на автора</button></p>
+        </div>
 
         <div class="card-list">
         {% for recipe in page %}
@@ -24,15 +28,13 @@
 
   <script src="{% static 'js/components/Purchases.js' %}"></script>
   <script src="{% static 'js/components/Favorites.js' %}"></script>
+  <script src="{% static 'js/components/Subscribe.js' %}"></script>
 
   <script src="{% static 'js/config/config.js' %}"></script>
-  <script src="{% static 'js/components/CardList.js' %}"></script>
+  <script src="{% static 'js/components/AuthorRecipe.js' %}"></script>
   <script src="{% static 'js/components/Header.js' %}"></script>
 
   <script src="{% static 'js/api/Api.js' %}"></script>
-{% if user.is_authenticated %}
-  <script src="{% static 'indexAuth.js' %}"></script>
-{% else %}
-  <script src="{% static 'indexNotAuth.js' %}"></script>
-{% endif %}
+  <script src="{% static 'authorRecipe.js' %}"></script>
+
 {% endblock %}
