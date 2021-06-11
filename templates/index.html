@@ -5,7 +5,7 @@
   <link rel="stylesheet" href="{% static 'pages/index.css' %}">
 {% endblock %}
 {% block header %}Рецепты{% endblock %}
-{% block ul_tags %} {% include "includes/tag_nav.html" with current_url="tag_index" %} {% endblock %}
+{% block ul_tags %} {% include "includes/tag_nav.html" %} {% endblock %}
 
 {% block content %}
   {% load user_filters %}
