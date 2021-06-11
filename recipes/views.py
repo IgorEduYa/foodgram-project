@@ -48,7 +48,7 @@ def profile(request, username):
 
 def recipe_view(request, id):
     recipe = get_object_or_404(Recipe, id=id)
-    return render(request, 'recipe_page.html', {'recipe': recipe,})
+    return render(request, 'recipe_page.html', {'recipe': recipe})
 
 
 @login_required
@@ -113,4 +113,18 @@ def favorites(request):
          request,
          'favorites.html',
          {'page': page, 'paginator': paginator, 'tag': tag}
+    )
+
+
+@login_required
+def purchases(request):
+    user = request.user
+    purchases = user.buyers.all()
+    recipes = []
+    for purchase in purchases:
+        recipes.append(purchase.recipe)
+    return render(
+        request,
+        'purchases.html',
+        {'recipes': recipes}
     )
