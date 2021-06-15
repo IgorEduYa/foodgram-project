@@ -8,7 +8,7 @@
 
 {% block content %}
   {% load user_filters %}
-
+  {% csrf_token %}
     <div class="card-list">
         {% for subscription in subscriptions %}
         <div class="card-user" data-author="{{ author.id }}">

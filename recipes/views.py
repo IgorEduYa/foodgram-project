@@ -69,6 +69,40 @@ def new_recipe(request):
 
 
 @login_required
+def recipe_edit(request, id):
+    recipe = get_object_or_404(Recipe, id=id)
+
+    if recipe.author != request.user:
+        return redirect('recipe', id=id)
+
+    form = RecipeForm(
+        request.POST or None,
+        files=request.FILES or None,
+        instance=recipe,
+    )
+    if form.is_valid():
+        to_save = form.save(commit=False)
+        to_save.author = request.user
+        to_save.save()
+        return redirect('recipe', id=id)
+
+    return render(
+        request,
+        "new_recipe.html",
+        {"form": form, 'edit': True, 'recipe': recipe}
+    )
+
+
+@login_required
+def recipe_delete(request, id):
+    recipe = get_object_or_404(Recipe, id=id)
+    if recipe.author != request.user:
+        return redirect('recipe', id=id)
+    recipe.delete()
+    return redirect('index')
+
+
+@login_required
 def subscribe(request):
     user = request.user
     all_param = request.GET.get('all')

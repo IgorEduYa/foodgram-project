@@ -1,10 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Создание рецепта{% endblock %}
+{% block title %}
+        {% if edit %}
+            Редактирование рецепта
+        {% else %}
+            Создание рецепта
+        {% endif %}
+{% endblock %}
 {% block link %}
   {% load static %}
   <link rel="stylesheet" href="{% static 'pages/form.css' %}">
 {% endblock %}
-{% block header %}Создание рецепта{% endblock %}
+{% block header %}
+        {% if edit %}
+            Редактирование рецепта
+        {% else %}
+            Создание рецепта
+        {% endif %}
+{% endblock %}
 {% block content %}
   {% load user_filters %}
     <div class="form-container">
@@ -22,7 +34,12 @@
             </div>
             {% endfor %}
             <div class="form__footer">
-                <button class="button button_style_blue">Создать рецепт</button>
+                {% if edit %}
+                  <button class="button button_style_blue">Сохранить</button>
+                  <a style="margin-left: 2.5em" href="{% url 'recipe_delete' recipe.id %}" class="form__ingredient-link">Удалить</a>
+                {% else %}
+                  <button class="button button_style_blue">Создать рецепт</button>
+                {% endif %}
             </div>
         </form>
     </div>
