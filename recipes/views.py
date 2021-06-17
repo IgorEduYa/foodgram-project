@@ -1,9 +1,14 @@
+import io
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from django.http import FileResponse
+
+from excel_response import ExcelResponse
 
 from .forms import RecipeForm
-from .models import Recipe, User
+from .models import Recipe, User, Component
 
 
 def index(request):
@@ -19,7 +24,11 @@ def index(request):
     return render(
          request,
          'index.html',
-         {'page': page, 'paginator': paginator, 'tag': tag}
+         {
+             'page': page,
+             'paginator': paginator,
+             'tag': tag,
+         }
     )
 
 
@@ -146,7 +155,11 @@ def favorites(request):
     return render(
          request,
          'favorites.html',
-         {'page': page, 'paginator': paginator, 'tag': tag}
+         {
+             'page': page,
+             'paginator': paginator,
+             'tag': tag,
+         }
     )
 
 
@@ -154,11 +167,40 @@ def favorites(request):
 def purchases(request):
     user = request.user
     purchases = user.buyers.all()
-    recipes = []
-    for purchase in purchases:
-        recipes.append(purchase.recipe)
+    recipes = Recipe.objects.filter(id__in=purchases.values('recipe_id'))
     return render(
         request,
         'purchases.html',
         {'recipes': recipes}
+    )
+
+
+@login_required
+def shoplist_download(request):
+    user = request.user
+    purchases = user.buyers.all()
+    recipes = Recipe.objects.filter(id__in=purchases.values('recipe_id'))
+    components = Component.objects.filter(recipe__in=recipes)
+    titles = []
+    dimensions = []
+    values = []
+    for comp in components:
+        if comp.unit.title in titles:
+            index = titles.index(comp.unit.title)
+            values[index] += comp.value
+        else:
+            titles.append(comp.unit.title)
+            dimensions.append(comp.unit.dimension)
+            values.append(comp.value)
+
+    data1 = [[titles[i], dimensions[i], values[i]] for i in range(len(titles))]
+    return ExcelResponse(data1)
+
+
+def page_not_found(request, exception):
+    return render(
+        request,
+        'misc/404.html',
+        {'path': request.path},
+        status=404
     )

@@ -1,5 +1,7 @@
 from django import template
 
+from recipes.models import Recipe
+
 
 register = template.Library()
 
@@ -12,7 +14,12 @@ def addclass(field, css):
 @register.filter
 def check_favor(obj, user):
     favors = user.favoriters.all()
-    recipes = []
-    for favor in favors:
-        recipes.append(favor.recipe)
+    recipes = Recipe.objects.filter(id__in=favors.values('recipe_id'))
+    return obj in recipes
+
+
+@register.filter
+def check_purchase(obj, user):
+    purchases = user.buyers.all()
+    recipes = Recipe.objects.filter(id__in=purchases.values('recipe_id'))
     return obj in recipes

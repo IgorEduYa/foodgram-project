@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Что купить?{% endblock %}
+{% block link %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'pages/index.css' %}">
+{% endblock %}
+{% block header %}Что купить?{% endblock %}
+{% block content %}
+  {% load user_filters %}
+    <div class="custom-center-block">
+        {% for comp in components %}
+        <ul class="card-user__items">
+            <li class="card-user__item">{{ comp.unit.title }} - {{ comp.value }} {{ comp.unit.dimension }}</li>
+        </ul>
+        {% endfor %}
+    </div>
+{% endblock %}

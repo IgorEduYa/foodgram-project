@@ -1,26 +1,37 @@
 from django.urls import include, path
-from rest_framework.routers import DefaultRouter
 
-from .views import PurchaseViewSet, FavoriteViewSet, SubscriptionViewSet
+from . import views
 
-
-router = DefaultRouter()
-router.register(
-    r'purchases/(?P<id>\d+)/',
-    PurchaseViewSet,
-    'purchase'
-)
-router.register(
-    r'subscriptions/(?P<id>\d+)/',
-    SubscriptionViewSet,
-    'subscription'
-)
-router.register(
-    r'favorites/(?P<id>\d+)/',
-    FavoriteViewSet,
-    'favorites'
-)
 
 urlpatterns = [
-    path('v1/', include(router.urls)),
+    path(
+        'v1/purchases/',
+        views.add_to_shoplist,
+        name='add_to_shop'
+    ),
+    path(
+        'v1/purchases/<int:id>/',
+        views.remove_from_shoplist,
+        name='remove_from_shoplist'
+    ),
+    path(
+        'v1/favorites/',
+        views.add_to_favorite,
+        name='add_to_favorite'
+    ),
+    path(
+        'v1/favorites/<int:id>/',
+        views.remove_from_favorite,
+        name='remove_from_favorite'
+    ),
+    path(
+        'v1/subscriptions/',
+        views.subscribe,
+        name='subscribe'
+    ),
+    path(
+        'v1/subscriptions/<int:id>/',
+        views.unsubscribe,
+        name='unsubscribe'
+    ),
 ]

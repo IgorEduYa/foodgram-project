@@ -11,7 +11,7 @@
   {% csrf_token %}
     <div class="card-list">
         {% for subscription in subscriptions %}
-        <div class="card-user" data-author="{{ author.id }}">
+        <div class="card-user" data-author="{{ subscription.author.id }}">
         <div class="card-user__header">
             <h2 class="card-user__title">{{ subscription.author.username }}</h2>
         </div>
