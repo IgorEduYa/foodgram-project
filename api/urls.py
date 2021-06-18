@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import path
 
 from . import views
 
@@ -34,4 +34,9 @@ urlpatterns = [
         views.unsubscribe,
         name='unsubscribe'
     ),
+    path(
+        'v1/ingredients/',
+        views.get_ingredients,
+        name='get_ingredients'
+    )
 ]

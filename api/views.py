@@ -1,11 +1,11 @@
 import json
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import get_object_or_404
 
-from recipes.models import Recipe, User
+from recipes.models import Recipe, User, Unit
 from .models import Purchases, Favorites, Subscription
 
 
@@ -96,3 +96,12 @@ def unsubscribe(request, id):
         subscription.delete()
         return JsonResponse({"success": True})
     return JsonResponse({"success": False})
+
+
+@csrf_protect
+@require_http_methods(['GET'])
+def get_ingredients(request):
+    query_string = request.GET.get('query')
+    result = list(Unit.objects.filter(
+        title__startswith=str(query_string)).values('title', 'dimension'))
+    return JsonResponse(result, safe=False)

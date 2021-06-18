@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}О технологии{% endblock %}
+{% block link %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'pages/index.css' %}">
+{% endblock %}
+{% block header %}О технологии{% endblock %}
+{% block content %}
+  {% load user_filters %}
+    <div class="custom-center-block">
+        <p class="custom-text-block">Описание технологии</p>
+    </div>
+{% endblock %}

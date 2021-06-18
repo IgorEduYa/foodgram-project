@@ -8,7 +8,7 @@ from django.http import FileResponse
 from excel_response import ExcelResponse
 
 from .forms import RecipeForm
-from .models import Recipe, User, Component
+from .models import Recipe, User, Component, Tag, Unit
 
 
 def index(request):
@@ -60,18 +60,51 @@ def recipe_view(request, id):
     return render(request, 'recipe_page.html', {'recipe': recipe})
 
 
+def get_ingredient(request):
+    ingredients = {}
+    for key, value in request.POST.items():
+        if key.startswith('nameIngredient'):
+            number = key.split('_')[1]
+            ingredients[value] = request.POST.get(f'valueIngredient_{number}')
+    return ingredients
+
+
+def form_saving(request, form):
+    recipe = form.save(commit=False)
+    recipe.author = request.user
+    recipe.save()
+    recipe.tag.clear()
+    if request.POST.get('breakfast'):
+        recipe.tag.add(Tag.objects.get(name='BF'))
+    if request.POST.get('lunch'):
+        recipe.tag.add(Tag.objects.get(name='LC'))
+    if request.POST.get('dinner'):
+        recipe.tag.add(Tag.objects.get(name='DN'))
+    ingredients = get_ingredient(request)
+    components = []
+    Component.objects.filter(recipe=recipe).delete()
+    for title, value in ingredients.items():
+        unit = get_object_or_404(Unit, title=title)
+        comp = Component(
+            recipe=recipe,
+            unit=unit,
+            value=value
+        )
+        components.append(comp)
+    Component.objects.bulk_create(components)
+    form.save_m2m()
+
+
 @login_required
 def new_recipe(request):
     if request.method != "POST":
         form = RecipeForm()
         return render(request, "new_recipe.html", {"form": form})
 
-    form = RecipeForm(request.POST)
+    form = RecipeForm(request.POST or None, files=request.FILES or None)
 
     if form.is_valid():
-        to_save = form.save(commit=False)
-        to_save.author = request.user
-        to_save.save()
+        form_saving(request, form)
         return redirect('index')
 
     return render(request, "new_recipe.html", {"form": form})
@@ -90,9 +123,7 @@ def recipe_edit(request, id):
         instance=recipe,
     )
     if form.is_valid():
-        to_save = form.save(commit=False)
-        to_save.author = request.user
-        to_save.save()
+        form_saving(request, form)
         return redirect('recipe', id=id)
 
     return render(

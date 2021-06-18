@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'recipes',
     'users',
     'api',
+    'flatpages',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
