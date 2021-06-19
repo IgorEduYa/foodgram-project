@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Purchases, Subscription, Favorites
+from .models import Favorites, Purchases, Subscription
 
 
 class PurchaseSerializer(serializers.ModelSerializer):

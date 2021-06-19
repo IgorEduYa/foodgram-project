@@ -1,14 +1,11 @@
-import io
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.core.paginator import Paginator
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import FileResponse
-
+from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404, redirect, render
 from excel_response import ExcelResponse
 
 from .forms import RecipeForm
-from .models import Recipe, User, Component, Tag, Unit
+from .models import Component, Recipe, Tag, Unit, User
 
 
 def index(request):
@@ -17,7 +14,7 @@ def index(request):
         recipes = Recipe.objects.filter(tag__name=str(tag))
     else:
         recipes = Recipe.objects.all()
-    paginator = Paginator(recipes, 6)
+    paginator = Paginator(recipes, settings.OBJECTS_PER_PAGE)
 
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -39,7 +36,7 @@ def profile(request, username):
         recipes = author.recipes.filter(tag__name=tag)
     else:
         recipes = author.recipes.all()
-    paginator = Paginator(recipes, 6)
+    paginator = Paginator(recipes, settings.OBJECTS_PER_PAGE)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
 

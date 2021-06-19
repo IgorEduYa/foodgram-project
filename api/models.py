@@ -1,8 +1,8 @@
-from django.db import models
 from django.contrib.auth import get_user_model
-from django.db.models import Q, F
-from recipes.models import Recipe
+from django.db import models
+from django.db.models import F, Q
 
+from recipes.models import Recipe
 
 User = get_user_model()
 
@@ -11,12 +11,12 @@ class Subscription(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="subscriber"
+        related_name='subscriber'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="subscriptions"
+        related_name='subscriptions'
     )
 
     class Meta:
@@ -36,12 +36,12 @@ class Favorites(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="favoriters",
+        related_name='favoriters',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name="favorite_recipes",
+        related_name='favorite_recipes',
     )
 
     class Meta:
@@ -57,12 +57,12 @@ class Purchases(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="buyers",
+        related_name='buyers',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name="shop_listing",
+        related_name='shop_listing',
     )
 
     class Meta:

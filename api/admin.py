@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Subscription, Favorites, Purchases
+
+from .models import Favorites, Purchases, Subscription
 
 
 @admin.register(Subscription)
