@@ -20,6 +20,8 @@ class Subscription(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],
@@ -45,6 +47,8 @@ class Favorites(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Избранный'
+        verbose_name_plural = 'Избранные'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
@@ -66,6 +70,8 @@ class Purchases(models.Model):
     )
 
     class Meta:
+        verbose_name = 'Покупка'
+        verbose_name_plural = 'Покупки'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],

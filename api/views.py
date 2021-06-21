@@ -10,93 +10,87 @@ from rest_framework import status
 from .models import Favorites, Purchases, Subscription
 
 
-@csrf_protect
-@require_http_methods(['POST'])
-def add_to_shoplist(request):
+def create_object(request, obj_model, sub_model):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     id = body.get('id')
-    recipe = get_object_or_404(Recipe, id=id)
-    purchase = Purchases.objects.create(
+    sub_obj = get_object_or_404(sub_model, id=id)
+    if obj_model == Subscription:
+        if request.user.username != sub_obj.username:
+            subscription, created = obj_model.objects.get_or_create(
+                user=request.user,
+                author=sub_obj
+            )
+            subscription.save()
+            return JsonResponse({"success": True},
+                                status=status.HTTP_201_CREATED)
+        return JsonResponse({"success": False},
+                            status=status.HTTP_403_FORBIDDEN)
+    obj = obj_model.objects.create(
         user=request.user,
-        recipe=recipe
+        recipe=sub_obj
     )
-    purchase.save()
+    obj.save()
     return JsonResponse({"success": True}, status=status.HTTP_201_CREATED)
+
+
+def delete_object(request, obj_model, id, sub_model):
+    sub_obj = get_object_or_404(sub_model, id=id)
+    if obj_model == Subscription:
+        if Subscription.objects.filter(
+                author=sub_obj).filter(user=request.user).exists():
+            subscription = get_object_or_404(
+                Subscription,
+                author=sub_obj,
+                user=request.user
+            )
+            subscription.delete()
+            return JsonResponse({"success": True}, status=status.HTTP_200_OK)
+        return JsonResponse({"success": False},
+                            status=status.HTTP_403_FORBIDDEN)
+    obj = get_object_or_404(
+        obj_model,
+        recipe=sub_obj,
+        user=request.user
+    )
+    obj.delete()
+    return JsonResponse({"success": True}, status=status.HTTP_200_OK)
+
+
+@csrf_protect
+@require_http_methods(['POST'])
+def add_to_shoplist(request):
+    return create_object(request, Purchases, Recipe)
 
 
 @csrf_protect
 @require_http_methods(['DELETE'])
 def remove_from_shoplist(request, id):
-    recipe = get_object_or_404(Recipe, id=id)
-    purchase = get_object_or_404(
-        Purchases,
-        recipe=recipe,
-        user=request.user
-    )
-    purchase.delete()
-    return JsonResponse({"success": True}, status=status.HTTP_200_OK)
+    return delete_object(request, Purchases, id, Recipe)
 
 
 @csrf_protect
 @require_http_methods(['POST'])
 def add_to_favorite(request):
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-    id = body.get('id')
-    recipe = get_object_or_404(Recipe, id=id)
-    favorite = Favorites.objects.create(
-        user=request.user,
-        recipe=recipe
-    )
-    favorite.save()
-    return JsonResponse({"success": True}, status=status.HTTP_201_CREATED)
+    return create_object(request, Favorites, Recipe)
 
 
 @csrf_protect
 @require_http_methods(['DELETE'])
 def remove_from_favorite(request, id):
-    recipe = get_object_or_404(Recipe, id=id)
-    favorite = get_object_or_404(
-        Favorites,
-        recipe=recipe,
-        user=request.user
-    )
-    favorite.delete()
-    return JsonResponse({"success": True}, status=status.HTTP_200_OK)
+    return delete_object(request, Favorites, id, Recipe)
 
 
 @csrf_protect
 @require_http_methods(['POST'])
 def subscribe(request):
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-    id = body.get('id')
-    author = get_object_or_404(User, id=id)
-    if request.user.username != author.username:
-        subscription, created = Subscription.objects.get_or_create(
-            user=request.user,
-            author=author
-        )
-        subscription.save()
-        return JsonResponse({"success": True}, status=status.HTTP_201_CREATED)
-    return JsonResponse({"success": False}, status=status.HTTP_403_FORBIDDEN)
+    return create_object(request, Subscription, User)
 
 
 @csrf_protect
 @require_http_methods(['DELETE'])
 def unsubscribe(request, id):
-    author = get_object_or_404(User, id=id)
-    if Subscription.objects.filter(
-            author=author).filter(user=request.user).exists():
-        subscription = get_object_or_404(
-            Subscription,
-            author=author,
-            user=request.user
-        )
-        subscription.delete()
-        return JsonResponse({"success": True}, status=status.HTTP_200_OK)
-    return JsonResponse({"success": False}, status=status.HTTP_403_FORBIDDEN)
+    return delete_object(request, Subscription, id, User)
 
 
 @csrf_protect

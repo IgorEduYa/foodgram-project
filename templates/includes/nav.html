@@ -8,7 +8,7 @@
                 <li class="nav__item {% if request.resolver_match.url_name == 'new_recipe' %}nav__item_active{% endif %}"><a href="{% url 'new_recipe' %}" class="nav__link link">Создать рецепт</a></li>
                 <li class="nav__item {% if request.resolver_match.url_name == 'favorites' %}nav__item_active{% endif %}"><a href="{% url 'favorites' %}" class="nav__link link">Избранное</a></li>
                 <li class="nav__item {% if request.resolver_match.url_name == 'purchases' %}nav__item_active{% endif %}"><a href="{% url 'purchases' %}" class="nav__link link">Список покупок</a>
-                    <span class="badge badge_style_blue nav__badge" id="counter">{{ user.buyers.count }}</span>
+                    <span class="badge badge_style_blue nav__badge" id="counter">{% if user.buyers.count > 0 %}{{ user.buyers.count }}{% endif %}</span>
                 </li>
               {% endif %}
             </ul>

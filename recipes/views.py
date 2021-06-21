@@ -8,16 +8,36 @@ from .forms import RecipeForm
 from .models import Component, Recipe, Tag, Unit, User
 
 
-def index(request):
+def get_recipes(request, username=None):
     tag = request.GET.get('tag')
-    if tag:
-        recipes = Recipe.objects.filter(tag__name=str(tag))
+    if username:
+        author = get_object_or_404(User, username=username)
+        if tag:
+            recipes = author.recipes.filter(tag__name=tag)
+        else:
+            recipes = author.recipes.all()
+    elif request.resolver_match.url_name == 'favorites':
+        author = None
+        user = request.user
+        if tag:
+            favors = user.favoriters.filter(recipe__tag__name=tag)
+        else:
+            favors = user.favoriters.all()
+        recipes = Recipe.objects.filter(id__in=favors.values('recipe_id'))
     else:
-        recipes = Recipe.objects.all()
+        author = None
+        if tag:
+            recipes = Recipe.objects.filter(tag__name=tag)
+        else:
+            recipes = Recipe.objects.all()
     paginator = Paginator(recipes, settings.OBJECTS_PER_PAGE)
-
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
+    return page, paginator, tag, author
+
+
+def index(request):
+    page, paginator, tag, author = get_recipes(request)
     return render(
          request,
          'index.html',
@@ -30,16 +50,7 @@ def index(request):
 
 
 def profile(request, username):
-    author = get_object_or_404(User, username=username)
-    tag = request.GET.get('tag')
-    if tag:
-        recipes = author.recipes.filter(tag__name=tag)
-    else:
-        recipes = author.recipes.all()
-    paginator = Paginator(recipes, settings.OBJECTS_PER_PAGE)
-    page_number = request.GET.get('page')
-    page = paginator.get_page(page_number)
-
+    page, paginator, tag, author = get_recipes(request, username)
     return render(
         request,
         'profile.html',
@@ -70,13 +81,7 @@ def form_saving(request, form):
     recipe = form.save(commit=False)
     recipe.author = request.user
     recipe.save()
-    recipe.tag.clear()
-    if request.POST.get('breakfast'):
-        recipe.tag.add(Tag.objects.get(name='BF'))
-    if request.POST.get('lunch'):
-        recipe.tag.add(Tag.objects.get(name='LC'))
-    if request.POST.get('dinner'):
-        recipe.tag.add(Tag.objects.get(name='DN'))
+
     ingredients = get_ingredient(request)
     components = []
     Component.objects.filter(recipe=recipe).delete()
@@ -99,6 +104,8 @@ def new_recipe(request):
         return render(request, "new_recipe.html", {"form": form})
 
     form = RecipeForm(request.POST or None, files=request.FILES or None)
+
+    print(request.POST.getlist('tags'))
 
     if form.is_valid():
         form_saving(request, form)
@@ -143,10 +150,7 @@ def recipe_delete(request, id):
 def subscribe(request):
     user = request.user
     all_param = request.GET.get('all')
-    if all_param:
-        all = int(all_param)
-    else:
-        all = None
+    all = int(all_param) if all_param else None
     subscriptions = user.subscriber.all()
     paginator = Paginator(subscriptions, 3)
 
@@ -165,21 +169,7 @@ def subscribe(request):
 
 @login_required
 def favorites(request):
-    user = request.user
-    tag = request.GET.get('tag')
-    if tag:
-        favors = user.favoriters.filter(recipe__tag__name=tag)
-    else:
-        favors = user.favoriters.all()
-
-    recipes = []
-
-    for favor in favors:
-        recipes.append(favor.recipe)
-
-    paginator = Paginator(recipes, 3)
-    page_number = request.GET.get('page')
-    page = paginator.get_page(page_number)
+    page, paginator, tag, author = get_recipes(request)
     return render(
          request,
          'favorites.html',
@@ -221,8 +211,8 @@ def shoplist_download(request):
             dimensions.append(comp.unit.dimension)
             values.append(comp.value)
 
-    data1 = [[titles[i], dimensions[i], values[i]] for i in range(len(titles))]
-    return ExcelResponse(data1)
+    data = [[titles[i], dimensions[i], values[i]] for i in range(len(titles))]
+    return ExcelResponse(data)
 
 
 def page_not_found(request, exception):
@@ -232,3 +222,7 @@ def page_not_found(request, exception):
         {'path': request.path},
         status=404
     )
+
+
+def server_error(request):
+    return render(request, "misc/500.html", status=500)

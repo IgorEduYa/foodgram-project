@@ -6,15 +6,20 @@ from .models import Component, Recipe, Tag, Unit
 class ComponentInLine(admin.TabularInline):
     model = Component
     extra = 1
+    min_num = 1
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'pub_date')
+    list_display = ('title', 'author', 'pub_date', 'favorite_count',)
     search_fields = ('title', 'author',)
     list_filter = ('author', 'pub_date',)
     filter_horizontal = ('components', 'tag',)
     inlines = (ComponentInLine,)
+
+    @admin.display(description='admirers')
+    def favorite_count(self, obj):
+        return obj.favorite_recipes.count()
 
 
 @admin.register(Tag)
