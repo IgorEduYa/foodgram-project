@@ -5,7 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from excel_response import ExcelResponse
 
 from .forms import RecipeForm
-from .models import Component, Recipe, Tag, Unit, User
+from .models import Component, Recipe, Unit, User
+from .utils import get_ingredient
 
 
 def get_recipes(request, username=None):
@@ -66,15 +67,6 @@ def profile(request, username):
 def recipe_view(request, id):
     recipe = get_object_or_404(Recipe, id=id)
     return render(request, 'recipe_page.html', {'recipe': recipe})
-
-
-def get_ingredient(request):
-    ingredients = {}
-    for key, value in request.POST.items():
-        if key.startswith('nameIngredient'):
-            number = key.split('_')[1]
-            ingredients[value] = request.POST.get(f'valueIngredient_{number}')
-    return ingredients
 
 
 def form_saving(request, form):
