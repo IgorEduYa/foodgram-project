@@ -8,6 +8,14 @@
 {% block content %}
   {% load user_filters %}
     <div class="custom-center-block">
-        <p class="custom-text-block">Описание технологии</p>
+      <div class="card-user__header">
+        <h2 class="card-user__title">В проекте использовались</h2>
+      </div>
+      <ul class="card-user__items">
+        <li class="card-user__item">IDE: PyCharm Community Edition</li>
+        <li class="card-user__item">Frontend: HTML + CSS + JS</li>
+        <li class="card-user__item">Backend: Python + Django</li>
+        <li class="card-user__item">External libraries: sorl-thumbnail, django-excel-response</li>
+      </ul>
     </div>
 {% endblock %}

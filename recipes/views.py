@@ -72,19 +72,24 @@ def recipe_view(request, id):
 def form_saving(request, form):
     recipe = form.save(commit=False)
     recipe.author = request.user
-    recipe.save()
+
 
     ingredients = get_ingredient(request)
     components = []
     Component.objects.filter(recipe=recipe).delete()
     for title, value in ingredients.items():
         unit = get_object_or_404(Unit, title=title)
+        value = value[1:] if value[0] == '-' else value
         comp = Component(
             recipe=recipe,
             unit=unit,
-            value=value
+            value=value,
         )
         components.append(comp)
+    if len(components) == 0:
+        form.add_error(None, 'Нет ингредиентов!')
+        return True
+    recipe.save()
     Component.objects.bulk_create(components)
     form.save_m2m()
 
@@ -100,7 +105,9 @@ def new_recipe(request):
     print(request.POST.getlist('tags'))
 
     if form.is_valid():
-        form_saving(request, form)
+        result = form_saving(request, form)
+        if result == True:
+            return render(request, "new_recipe.html", {"form": form})
         return redirect('index')
 
     return render(request, "new_recipe.html", {"form": form})
@@ -119,7 +126,13 @@ def recipe_edit(request, id):
         instance=recipe,
     )
     if form.is_valid():
-        form_saving(request, form)
+        result = form_saving(request, form)
+        if result == True:
+            return render(
+                request,
+                "new_recipe.html",
+                {"form": form, 'edit': True, 'recipe': recipe}
+            )
         return redirect('recipe', id=id)
 
     return render(
